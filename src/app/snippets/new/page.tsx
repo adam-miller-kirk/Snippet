@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation";
+"use client";
 import Link from "next/link";
-import { db } from "@/db";
+import { useFormState } from "react-dom";
+import { createSnippet } from "@/actions";
 
 interface FormValues {
   title: string;
@@ -8,25 +9,10 @@ interface FormValues {
 }
 
 export default function SnippetNew() {
-  async function createSnippet(formDate: FormData) {
-    // This needs to be a server action
-    "use server";
-
-    // Check the user's inputs and make sure they are valid
-    const title = formDate.get("title") as string;
-    const code = formDate.get("code") as string;
-
-    // Create a new record in the database
-    const snippet = await db.snippet.create({
-      data: { title, code },
-    });
-
-    // Redirect the user back to the root route
-    redirect("/");
-  }
+  const [formState, action] = useFormState(createSnippet, { message: "" });
 
   return (
-    <form action={createSnippet}>
+    <form action={action}>
       <div className="flex m-4 justify-between items-center">
         <h3 className="font-bold">Create Snippet Page</h3>
         <Link href={`/`} className="p-2 border rounded">
@@ -54,6 +40,12 @@ export default function SnippetNew() {
             id="code"
           />
         </div>
+
+        {formState.message && (
+          <div className="my-2 p-2 bg-red-200 border rounded border-red-500">
+            {formState.message}
+          </div>
+        )}
 
         <button type="submit" className="roudned p-2 bg-blue-200">
           Create
